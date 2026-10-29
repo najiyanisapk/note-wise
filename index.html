@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Notewise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root{--w:#fff;--k:#111;--y:#ffd84d;--pk:#ffc2dc;--lv:#d9ccff;--pe:#ffd2b8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--w);color:var(--k);font:400 16px/1.6 Inter,system-ui,sans-serif}
+h1,h2,h3{font-family:"Bricolage Grotesque",Inter,sans-serif;font-weight:800;line-height:1.15;margin:0 0 .5rem}
+h1{font-size:2rem}h2{font-size:1.4rem}h3{font-size:1.05rem}
+.top{display:flex;justify-content:space-between;align-items:center;gap:.5rem;max-width:960px;margin:auto;padding:.8rem 1rem}
+nav{display:flex;gap:.4rem;overflow-x:auto;padding:.5rem 1rem;max-width:960px;margin:auto;border-bottom:2px solid var(--k)}
+nav button{white-space:nowrap}
+main{max-width:960px;margin:auto;padding:1rem}
+.card{background:var(--w);border:2px solid var(--k);border-radius:14px;padding:1rem;margin:0 0 1rem;box-shadow:4px 4px 0 var(--lv)}
+.hero{background:var(--pe);box-shadow:6px 6px 0 var(--k)}
+button,select,input,textarea{font:inherit;color:var(--k)}
+button{background:var(--y);border:2px solid var(--k);border-radius:10px;padding:.45rem .9rem;cursor:pointer;font-weight:600}
+button:hover{background:var(--pk)}button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--k);outline-offset:2px}
+button.on{background:var(--k);color:var(--w)}button.ghost{background:var(--w)}button.ghost:hover{background:var(--lv)}button:disabled{opacity:.45;cursor:not-allowed}
+select,input[type=text],input[type=password],input[type=number],input[type=search],textarea{width:100%;background:var(--w);border:2px solid var(--k);border-radius:10px;padding:.5rem}
+textarea{min-height:110px}label{display:block;font-weight:600;margin:.6rem 0 .2rem;font-size:.92rem}
+.row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}.grid{display:grid;gap:.8rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.tag{display:inline-block;background:var(--pk);border:1.5px solid var(--k);border-radius:99px;padding:0 .6rem;font-size:.8rem;margin:.1rem .2rem .1rem 0;font-weight:500}
+.tag.l{background:var(--lv)}.tag.p{background:var(--pe)}.tag.y{background:var(--y)}.mut{font-size:.88rem;opacity:.75}
+.msg{border:2px solid var(--k);border-radius:10px;padding:.7rem .9rem;margin:.6rem 0;background:var(--lv)}.msg.err{background:var(--pk)}
+.pal{display:flex;gap:.4rem;flex-wrap:wrap}.pal button{width:2.4rem;height:2.4rem;padding:0;background:var(--w)}.pal button.a{background:var(--lv)}.pal button.c{background:var(--y)}
+#tm{font-family:"Bricolage Grotesque";font-weight:800;font-size:1.3rem}
+dialog{border:2px solid var(--k);border-radius:14px;background:var(--w);color:var(--k);max-width:92vw}
+pre{white-space:pre-wrap;margin:0;font:inherit}.chips{display:flex;gap:.35rem;flex-wrap:wrap}.chips button{padding:.15rem .6rem;font-size:.85rem;background:var(--w)}
+</style></head><body>
+<div class="top"><h2 style="margin:0">Notewise</h2><div id="who" class="row"></div></div>
+<nav id="nav" aria-label="Sections"></nav>
+<main id="app" aria-live="polite"></main>
+<dialog id="dlg"><h3 id="dt"></h3><p id="db"></p><div class="row"><button id="dy">Confirm</button><button class="ghost" id="dn">Cancel</button></div></dialog>
+<script>
+const SUBJ=["Digital Systems","Computer Organization","Data Structures and Algorithms","Software Engineering","Mathematics"];
+const MODS=["Module 1","Module 2","Module 3","Module 4","Module 5"];
+const SYL_RAW=[
+[["Number systems and codes","Number systems - Decimal, Binary, Octal and Hexadecimal - conversion from one system to another - Representation of negative numbers - Representation of BCD numbers - character representation - character coding schemes - ASCII - EBCDIC - Addition, subtraction, multiplication and division of binary numbers - Addition and subtraction of BCD, Octal and Hexadecimal numbers - Introduction to floating point numbers"],
+["Boolean algebra","Postulates of Boolean algebra - Basic theorems and Properties of Boolean Algebra - Boolean Functions - Canonical and standard forms - Simplification of Boolean Functions - Karnaugh Map Method - Don't care conditions - Product of sums using basic and universal gates"],
+["Combinational logic","Design Procedure and Implementation of combinational logic circuits - Binary adders and subtractors - Binary Parallel adder - Carry look ahead adder - BCD adder - Code converter - Magnitude comparator - Decoder - Demultiplexer - Encoder - Multiplexer - Parity generator, Checker"],
+["Sequential logic circuits","Flip-flops - SR, JK, T and D - Triggering of flip-flops - Master slave flip-flops - Excitation table and characteristic equation - Registers with parallel load - Asynchronous counters - Binary and BCD counters - timing sequences and state diagrams - Synchronous counters - Binary Up-down counter - BCD counter"],
+["Shift registers and programmable logic devices","Shift registers - Serial In Serial Out - Serial In Parallel Out - Bidirectional Shift Register with Parallel load - Ring counter - Johnson counter - Timing sequences and state diagrams - Programmable logic devices - Memory decoding - Error detection and correction - RAM - ROM - Programmable Logic Array - Implementation of simple circuits using PLA"]],
+[["Basic structure of computers and basic processing unit","Basic Structure of computers - functional units - basic operational concepts - bus structures - Memory locations and addresses - memory operations - Instructions and instruction sequencing - addressing modes - Basic processing unit - fundamental concepts - instruction cycle - execution of a complete instruction - single bus and multiple bus organization"],
+["Computer arithmetic","Numbers, Arithmetic Operation and Characters - Addition and subtraction of signed numbers - Design of fast adders - Multiplication of positive numbers - Signed operand multiplication - Integer division"],
+["The memory system","Memory system basic concepts - Memory Hierarchy - Semiconductor RAM memories - Internal organization of memory chips - Static memories - Asynchronous DRAM - Synchronous DRAM - Read Only Memories - Cache memories - mapping functions - Virtual memory - Secondary storage"],
+["Processor logic design","Processor organization - Arithmetic logic unit - Design of arithmetic circuit - design of logic circuit - Design of arithmetic logic unit - Status register - Design of shifter - processor unit - Design of accumulator"],
+["Input output organization and pipelining","Input Output organization - Accessing of I/O devices - Interrupts - Interrupt hardware - Direct memory access - Pipelining - Basic concepts - Data hazards - Instruction hazards - Control hazards"]],
+[["Introduction","Introduction and overview of data structures - Linear data structures - Non-linear data structures - Algorithms - Complexity of algorithms - Time complexity - Space complexity - Asymptotic notations - Complexity calculation of simple algorithms - Recursion - Recursive algorithms - Analysis of recursive algorithms"],
+["Arrays and searching","Arrays - Representation - Sparse matrix - Stacks - Queues - Circular Queues - Priority Queues - Double Ended Queues - Evaluation of expressions - Linear Search - Binary Search"],
+["Linked list","Singly Linked List - Operations on Linked List - Insertion and deletion at the beginning, at the end and at a specific location - Doubly Linked List - Circular Linked List - Stacks and Queues using Linked List - Conversion of infix to postfix - Evaluation of postfix expression"],
+["Tree and graphs","Trees - Basic terminologies - Representation of binary tree - Binary tree traversals - pre-order, inorder and postorder - Types of binary trees - Binary search tree - Graphs - Graph terminologies - Representation of graph - Graph traversals - DFS, BFS - Dijkstra's algorithm - Floyd's algorithm - Minimum spanning tree - Kruskal's algorithm - Prim's algorithm"],
+["Sorting and hashing","Sorting - Basic terminologies - Sorting techniques - Bubble sort - Insertion sort - Selection sort - Quick sort - Heap sort - Merge sort - Hashing - Hashing techniques - Collision resolution - Overflow handling - Hashing functions - Mid square - Division - Folding - Digit analysis"]],
+[["Introduction to software engineering","Basic concepts - Software Life Cycle Models - Classical Waterfall Model - Iterative Waterfall Model - Prototyping Model - Incremental Development Model - Evolutionary Model - Rapid application Development - Agile development models - Spiral model - Comparison of different lifecycle models"],
+["Software project management","Responsibilities of software project manager - Project planning - Project estimation techniques - COCOMO model - scheduling - Organisation and team structures - Staffing - Risk management - Software organisation management"],
+["Requirements analysis and software design","Requirement gathering and analysis - Software requirement specification - Software design - Overview of the design process - How to characterize a good software design - Cohesion and Coupling - Function oriented software design - Overview of SA/SD - Structured Analysis - Structured Design"],
+["Coding and testing","Coding standards and guidelines - Code review - Software documentation - Testing - Basic concepts and terminology - verification and validation - Testing activities - Unit testing - Black box testing - White box testing - Integration testing - System testing - general issues associated with testing"],
+["Software maintenance","Characteristics of software maintenance - Software reverse engineering - Software maintenance process models - Estimation of maintenance cost"]],
+[["Functions of a complex variable I","Functions of a Complex Variable - Limit - Continuity - Derivative of a Complex function - Analytic functions - Cauchy-Riemann Equations - Laplace equation - Harmonic Functions - Conformal Mapping - Mobius Transformation"],
+["Functions of a complex variable II","line integral in the complex plane - Cauchy's integral theorem - Independence of path - Cauchy's integral formula - Derivatives of analytic functions - Taylor series - Laurent series - Singularities - Zeros - Poles - Residues - Evaluation of residues - Cauchy's residue theorem"],
+["Linear algebra","Vector spaces - Subspaces - Linear Span - Linear Independence - Linear Dependence - Basis - Dimension - Orthogonal and Orthonormal sets - Orthogonal Basis - Orthonormal Basis - Gram-Schmidt orthogonalization process - Inner product spaces - Schwartz inequality - Triangle inequality"],
+["Partial differential equations","Solutions of equations of the form F(p,q) = 0 - Clairaut's form - Lagrange's form - Classification of Linear PDE's - partial differential equations"],
+["Applications of partial differential equations","Derivation of one dimensional wave equation - solution of one dimensional wave equation - Derivation of one dimensional heat equation - solution of one dimensional heat equation"]]];
+const GEN=new Set(["examples","definition","basic","concepts","introduction","operations","types","model","models","systems","analysis","design","testing","process","organisation"]);
+const SYLLABUS={};SYL_RAW.forEach((mods,s)=>{SYLLABUS[s]={};mods.forEach((m,i)=>{SYLLABUS[s][i]=[m[0],...m[1].split(/\s+-\s+|,\s+|;\s+/).map(x=>x.trim()).filter(x=>x.length>4&&!GEN.has(x.toLowerCase()))]})});
+const BOOKS=[
+{s:0,k:"Text book",t:"Digital Logic & Computer Design",a:"M. M. Mano",d:"4th edition, Pearson Education, 2013"},
+{s:0,k:"Text book",t:"Digital Fundamentals",a:"T. L. Floyd",d:"10th edition, Pearson Education, 2009"},
+{s:0,k:"Text book",t:"Computer System Architecture",a:"M. Morris Mano",d:"3rd edition, Pearson Education, 2007"},
+{s:0,k:"Text book",t:"Digital Design and Computer Architecture",a:"D. M. Harris and S. L. Harris",d:"2nd edition, Morgan Kaufmann Publishers, 2013"},
+{s:0,k:"Reference book",t:"Digital Electronics: Principles and Applications",a:"R. L. Tokheim",d:"7th edition, Tata McGraw Hill, 2007"},
+{s:0,k:"Reference book",t:"Digital Design",a:"M. M. Mano and M. D. Ciletti",d:"4th edition, Pearson Education, 2008"},
+{s:0,k:"Reference book",t:"An Introduction to Digital Computer Design",a:"V. Rajaraman and T. Radhakrishnan",d:"5th edition, Prentice Hall India Private Limited, 2012"},
+{s:0,k:"Reference book",t:"Digital Principles and Applications",a:"D. Leach, A. P. Malvino and G. Saha",d:"8th edition, McGraw Hill Education, 2015"},
+{s:0,k:"Reference book",t:"Digital System Design Using VHDL",a:"Charles H. Roth, Jr. and Lizy Kurian John",d:"2nd edition, Cengage Learning"},
+{s:1,k:"Text book",t:"Computer Organization (International Edition)",a:"C. V. Hamacher",d:"5th edition, McGraw Hill, New York, 2011"},
+{s:1,k:"Text book",t:"Digital Logic & Computer Design",a:"M. M. Mano",d:"PHI, 2004"},
+{s:1,k:"Reference book",t:"Computer Organization and Design",a:"D. A. Patterson and J. L. Hennessy",d:"5th edition, Morgan Kaufmann Publishers, 2013"},
+{s:1,k:"Reference book",t:"Computer Organization and Architecture: Designing for Performance",a:"William Stallings",d:"9th edition, Pearson, 2013"},
+{s:1,k:"Reference book",t:"Computer Organization and Architecture",a:"V. Rajaraman and T. Radhakrishnan",d:"Prentice Hall, 2011"},
+{s:2,k:"Text book",t:"Classic Data Structures",a:"D. Samanta",d:"2nd edition, Prentice Hall"},
+{s:3,k:"Text book",t:"Fundamentals of Software Engineering",a:"Rajib Mall",d:"5th edition"},
+{s:3,k:"Reference book",t:"Software Engineering",a:"Ian Sommerville",d:"7th edition, Pearson Education, 2004"},
+{s:3,k:"Reference book",t:"Software Engineering",a:"K. K. Aggarwal and Yogesh Singh",d:"2nd edition, New Age International Publishers, 2005"},
+{s:3,k:"Reference book",t:"Software Engineering: A Practitioner's Approach",a:"Roger S. Pressman",d:"8th edition, McGraw Hill, 2014"},
+{s:3,k:"Reference book",t:"Software Project Management: A Concise Study",a:"S. A. Kelkar",d:"3rd edition, PHI, 2012"},
+{s:4,k:"Text book",t:"Higher Engineering Mathematics",a:"B. S. Grewal",d:"36th edition, Khanna Publishers, 2010"},
+{s:4,k:"Text book",t:"A Text Book of Engineering Mathematics",a:"N. P. Bali and Manish Goyal",d:"Laxmi Publications, Reprint 2008"},
+{s:4,k:"Listed in syllabus",t:"Calculus and Analytic Geometry",a:"G. B. Thomas and R. L. Finney",d:"9th edition, Pearson Reprint, 2002"},
+{s:4,k:"Listed in syllabus",t:"Advanced Engineering Mathematics",a:"Erwin Kreyszig",d:"9th edition, John Wiley & Sons, 2006"},
+{s:4,k:"Listed in syllabus",t:"Theory and Problems of Linear Algebra",a:"R. D. Sharma and Rittu Jain",d:"Dreamtech Press, 2019"}];
+const KW=[["number system","boolean algebra","combinational","sequential","shift register","programmable logic","flip-flop","flip flop"],
+["computer structure","arithmetic","memory","processor","input/output","pipelining","instruction"],
+["stack","queue","linked list","tree","graph","sorting","hashing"],
+["life cycle","life-cycle","project management","requirement","design","testing","maintenance"],["matrix","integral","derivative","eigen","vector"]];
+const mem={};const store={get(k){try{return localStorage.getItem(k)}catch(e){return mem[k]||null}},set(k,v){try{localStorage.setItem(k,v);return true}catch(e){mem[k]=v;return false}}};
+const $=s=>document.querySelector(s);
+const esc=t=>String(t??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const J=v=>JSON.stringify(v).replace(/&/g,"&amp;").replace(/'/g,"&#39;");
+let U={},user=store.get("nw_cur"),D=null,storeOk=true,tab=0,ex=null,tick=null,busy="",note="",ex2=null,authMode=0,cf=null,tsel=0,ts="",bf=0,bm="all",es=0,doubt={a:"",busy:0},qaBusy="";
+try{U=JSON.parse(store.get("nw_users")||"{}")}catch(e){}
+const blank=()=>({files:[],qa:{},doubts:[],att:[],exam:null});
+function load(){try{D=JSON.parse(store.get("nw_d_"+user)||"null")}catch(e){}D=D||blank();ex=D.exam&&!D.exam.done?D.exam:null}
+function save(){D.exam=ex;storeOk=store.set("nw_d_"+user,JSON.stringify(D))}
+if(user&&U[user])load();else user=null;
+async function hash(s){try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("nw"+s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}catch(e){return"p"+s}}
+async function auth(){const n=$("#an").value.trim(),p=$("#ap").value;if(!n||p.length<4){note="err|Enter a name and a PIN of at least 4 characters.";return view()}
+ const h=await hash(p);if(authMode==1){if(U[n]){note="err|This name is taken on this device. Sign in instead.";return view()}U[n]={h};store.set("nw_users",JSON.stringify(U))}
+ else if(!U[n]||U[n].h!=h){note="err|Name or PIN is not correct.";return view()}
+ user=n;store.set("nw_cur",n);load();tab=0;note="";view()}
+function out(){user=null;store.set("nw_cur","");D=null;ex=null;note="";view()}
+const toks=t=>[...new Set(t.toLowerCase().replace(/[^a-z0-9 ]/g," ").split(/\s+/).filter(w=>w.length>3))];
+function detect(text){const tk=new Set(toks(text)),low=text.toLowerCase();let r={s:null,m:null,how:""},best=1;
+ for(const s in SYLLABUS)for(const m in SYLLABUS[s]){let c=0;SYLLABUS[s][m].forEach(tp=>{const tt=toks(tp);if(tt.length&&tt.filter(w=>tk.has(w)).length/tt.length>=.6)c++});if(c>best){best=c;r={s:+s,m:+m,how:"syllabus"}}}
+ if(r.s!=null)return r;
+ let bs=0;KW.forEach((ks,i)=>{const c=ks.filter(k=>low.includes(k)).length;if(c>bs&&c>=2){bs=c;r={s:i,m:null,how:"keywords"}}});return r}
+function topics(f){const out=[];let cur=null;f.pages.forEach(p=>(p.text||"").split("\n").forEach(l=>{l=l.trim();if(!l)return;
+ const head=l.length<=70&&!/[.;,:]$/.test(l)&&/^[A-Z0-9]/.test(l)&&l.split(/\s+/).length<=9;
+ if(head){cur={t:l.replace(/^\d+[.)]\s*/,""),b:"",p:p.n};out.push(cur)}else{if(!cur){cur={t:"Introduction",b:"",p:p.n};out.push(cur)}cur.b+=l+" "}}));return out.filter(t=>t.b.length>40)}
+function parseQs(f){const out=[];const re=/^\s*(?:Q\.?\s*)?(\d{1,2})\s*[.)\]:]\s+(.{8,})/i;
+ f.pages.forEach(p=>{let cur=null;(p.text||"").split("\n").forEach(l=>{const m=l.match(re);if(m){cur={text:m[2].trim(),page:p.n,file:f.name};out.push(cur)}else if(cur&&l.trim())cur.text+=" "+l.trim()})});
+ out.forEach(q=>{const m=q.text.match(/\(?\[?\s*(\d{1,2})\s*marks?\s*\]?\)?/i)||q.text.match(/\[(\d{1,2})\]\s*$/);q.marks=m?+m[1]:null;q.text=q.text.replace(/\(?\[?\s*\d{1,2}\s*marks?\s*\]?\)?/i,"").replace(/\[\d{1,2}\]\s*$/,"").trim()});return out}
+async function readPdf(file){if(typeof pdfjsLib=="undefined")throw new Error("PDF reader did not load. Check your internet");const buf=await file.arrayBuffer();pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+ const pdf=await pdfjsLib.getDocument({data:buf,isEvalSupported:false,useSystemFonts:true}).promise;const pages=[];
+ for(let i=1;i<=pdf.numPages;i++){const c=await(await pdf.getPage(i)).getTextContent();let y=null,t="";c.items.forEach(it=>{const yy=Math.round(it.transform[5]);if(y!==null&&Math.abs(yy-y)>3)t+="\n";t+=it.str+" ";y=yy});pages.push({n:i,text:t})}return pages}
+function addFile(name,type,pages,manual){const text=pages.map(p=>p.text).join("\n");const d=detect(text);
+ D.files.push({id:Date.now(),name:manual?name+" (typed text)":name,type,s:d.s,mod:d.m,how:d.how,pages});save();
+ const f=D.files[D.files.length-1];cf=f.id;note="ok|Added "+f.name+". "+(d.s==null?"Subject could not be detected. Choose it below.":"Detected: "+SUBJ[d.s]+(d.m!=null?", "+MODS[d.m]:". Module could not be detected. Choose it below.")+" Please check it.")}
+async function upload(inp){const files=[...inp.files];inp.value="";if(!files.length)return;const type=$("#ut").value;note="";let ok=0;const bad=[];
+ for(const file of files){busy="Reading "+file.name+"...";view();
+  try{const pages=/\.txt$/i.test(file.name)||file.type=="text/plain"?[{n:null,text:await file.text()}]:await readPdf(file);
+   const ch=pages.reduce((a,p)=>a+p.text.replace(/\s/g,"").length,0);
+   if(ch<40){bad.push(file.name+" (no readable text, it may be scanned)");ex2={name:file.name,type};continue}
+   addFile(file.name,type,pages);ok++}catch(e){bad.push(file.name+" ("+((e&&(e.message||e.name))||"unknown error")+")");ex2={name:file.name,type}}}
+ busy="";if(bad.length)note="err|"+(ok?"Added "+ok+" file(s). ":"")+"Could not read: "+bad.join("; ")+". Use Paste text instead.";view()}
+function manual(){const t=$("#mt").value.trim(),n=($("#mn").value.trim()||(ex2?ex2.name:"Pasted notes")),ty=ex2?ex2.type:$("#ut").value;if(t.length<40){note="err|Paste at least a few lines of text.";return view()}addFile(n,ty,[{n:null,text:t}],1);ex2=null;view()}
+function setF(id,k,v){const f=D.files.find(x=>x.id==id);f[k]=v===""?null:+v;save();view()}
+const fOf=id=>D.files.find(x=>x.id==id);
+function notesOf(f){return f?topics(f):[]}
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+async function AI(){try{return window.claude?await claude.use("sample"):null}catch(e){return null}}
+async function genQA(fid,ti){const f=fOf(fid),t=notesOf(f)[ti];const sm=await AI();if(!sm){note="err|AI is not available in this view. The notes text is shown instead.";return view()}
+ qaBusy=fid+"|"+ti;view();try{const r=await sm.json(`Use ONLY the notes below. Write 3 exam questions with answers: one 5-mark (about 120 words) and two 10-mark (about 250 words, use a short list, truth table or algorithm only if the notes support it). Return only JSON: [{"q":"","a":"","marks":5}]. Topic: ${t.t}\nNotes: ${t.b.slice(0,5000)}`,{cache:false});
+  D.qa[fid+"|"+t.t]=Array.isArray(r)?r:[];save();note="ok|Questions and answers added. Check them against your notes."}catch(e){note="err|AI could not finish. Try again later."}qaBusy="";view()}
+async function askDoubt(){const q=$("#dq").value.trim();if(!q){note="err|Type your doubt first.";return view()}const sm=await AI();if(!sm){note="err|AI is not available in this view.";return view()}
+ const f=fOf(+$("#df").value),ctx=f?notesOf(f).map(t=>t.t+": "+t.b).join("\n").slice(0,9000):"";doubt={a:"Thinking...",busy:1};view();
+ try{const r=await sm(`You are a study helper. Answer clearly and briefly for a student. If notes are given, use them first and say when the answer is not in them.\nNotes:\n${ctx||"(none)"}\n\nDoubt: ${q}`,{cache:false,onText:({text})=>{doubt.a=text;const e=$("#da");if(e)e.textContent=text}});
+  doubt={a:r.text,busy:0};D.doubts.unshift({q,a:r.text,at:new Date().toLocaleString(),f:f?f.name:""});save()}catch(e){doubt={a:"",busy:0};note="err|AI could not answer. Try again later."}view()}
+function build(){const s=+$("#es").value,mv=$("#em").value,src=$("#esrc").value;const mods=mv=="all"?[0,1,2,3,4]:[+mv];
+ const fs=D.files.filter(f=>f.s==s&&(mv=="all"||f.mod==+mv));let pool=[];const seen=new Set();const add=q=>{const k=q.text.toLowerCase().replace(/\W+/g,"");if(!seen.has(k)){seen.add(k);pool.push(q)}};
+ if(src!="notes")shuffle(fs.filter(f=>f.type=="paper").flatMap(parseQs)).forEach(q=>add({...q,gen:false}));
+ if(src!="papers")shuffle(fs.filter(f=>f.type=="notes").flatMap(f=>topics(f).map(t=>({t,f})))).forEach(({t,f})=>add({text:shuffle(["Explain %.","Describe %. Give a suitable example.","Write short notes on %.","Discuss % with a neat diagram where relevant."])[0].replace("%",t.t),marks:null,gen:true,tp:t.t,file:f.name,page:t.p}));
+ const A=pool.filter(q=>q.marks==5),B=pool.filter(q=>q.marks==10),Ua=shuffle(pool.filter(q=>q.marks!=5&&q.marks!=10));
+ const take=(first,n)=>{const r=first.slice(0,n);const left=n-r.length;return r.concat(left>0?Ua.splice(0,left):[])};const a=take(A,4),b=take(B,4);
+ if(a.length<4||b.length<4){ex=null;note=`err|Not enough suitable questions. Found ${a.length} of 4 for Section A and ${b.length} of 4 for Section B. Upload more papers or notes for this subject and module. Check each file's subject and module on the Upload page.`;return view()}
+ const qs=[...a.map(q=>({...q,sec:"A",marks:5,stated:q.marks==5})),...b.map(q=>({...q,sec:"B",marks:10,stated:q.marks==10}))].map((q,i)=>({...q,id:i}));
+ ex={s,mods,src,qs,ans:{},cur:0,end:Date.now()+90*60000,done:false};note="";save();view()}
+function submit(){clearInterval(tick);ex.done=true;ex.self={};ex.ai=null;
+ D.att.push({at:new Date().toLocaleString(),s:ex.s,scope:ex.mods.length==5?"All modules":MODS[ex.mods[0]],answered:Object.values(ex.ans).filter(v=>v&&v.trim()).length,qs:ex.qs.map(q=>({text:q.text,m:q.marks,a:ex.ans[q.id]||"",src:q.file,page:q.page})),self:null});save();view()}
+async function evalAI(){const sm=await AI();if(!sm){note="err|AI is not available in this view. Use self-marking.";return view()}busy="Evaluating answers...";view();
+ try{const r=await sm.json(`Mark these exam answers strictly. Return only JSON: [{"id":0,"marks":0,"feedback":"one short sentence"}]. Marks cannot exceed max.\n`+JSON.stringify(ex.qs.map(q=>({id:q.id,max:q.marks,question:q.text,answer:ex.ans[q.id]||""}))),{cache:false});
+  ex.ai={};r.forEach(x=>{const q=ex.qs[x.id];if(q)ex.ai[x.id]={m:Math.max(0,Math.min(q.marks,+x.marks||0)),f:String(x.feedback||"")}});note="ok|Estimated scores added. They are not verified marks."}catch(e){note="err|Evaluation failed. Use self-marking."}busy="";save();view()}
+function confirmD(t,b,fn){$("#dt").textContent=t;$("#db").textContent=b;const d=$("#dlg");d.showModal();$("#dy").onclick=()=>{d.close();fn()};$("#dn").onclick=()=>d.close()}
+function startTimer(){clearInterval(tick);tick=setInterval(()=>{if(!ex||ex.done)return clearInterval(tick);const r=ex.end-Date.now();if(r<=0){const d=$("#dlg");if(d.open)d.close();submit();return}const e=$("#tm");if(e){e.textContent=Math.floor(r/60000)+":"+String(Math.floor(r%60000/1000)).padStart(2,"0")}},500)}
+function copy(t){try{navigator.clipboard.writeText(t).then(()=>{note="ok|Copied.";view()},()=>{note="err|Copy was blocked by the browser.";view()})}catch(e){note="err|Copy is not available here.";view()}}
+async function dl(name,text){try{const d=window.claude&&await claude.use("downloads");if(!d){note="err|Saving files is not available here. Use Copy.";return view()}await d.save({filename:name,data:text})}catch(e){if(!e||e.code!="declined"){note="err|The file could not be saved. Use Copy.";view()}}}
+function qaText(f){return notesOf(f).map(t=>{const q=D.qa[f.id+"|"+t.t];return"## "+t.t+"\n"+(q?q.map(x=>`Q (${x.marks} marks): ${x.q}\nA: ${x.a}`).join("\n\n"):t.b)}).join("\n\n")}
+const sub=(id,sel,fn)=>`<select id="${id}" aria-label="Subject" onchange="${fn}">${SUBJ.map((x,i)=>`<option value="${i}" ${i==sel?"selected":""}>${x}</option>`).join("")}</select>`;
+const where=q=>q.gen?`Generated from ${esc(q.file)}${q.page?", page "+q.page:""}`:`Source: ${esc(q.file)}, ${q.page?"page "+q.page:"page not available"}`;
+const srcT=q=>q.gen?`<span class="tag p">Generated practice question</span>`:`<span class="tag l">Previous-year question</span>`;
+function msg(){if(!note)return"";const[k,t]=note.split(/\|(.*)/s);return`<div class="msg ${k=="err"?"err":""}" role="${k=="err"?"alert":"status"}">${esc(t)}</div>`}
+const TABS=["Upload","Notes","Books","Ask doubt","Model exam","History"];
+function view(){const app=$("#app");
+ if(!user){$("#who").innerHTML="";$("#nav").innerHTML="";app.innerHTML=vEntry();return}
+ $("#who").innerHTML=`<span class="mut">${esc(user)}</span><button class="ghost" onclick="out()">Sign out</button>`;
+ $("#nav").innerHTML=TABS.map((t,i)=>`<button class="${i==tab?"on":"ghost"}" onclick="tab=${i};note='';view()">${t}</button>`).join("");
+ app.innerHTML=(busy?`<div class="msg">${esc(busy)}</div>`:"")+msg()+[vUp,vNotes,vBooks,vDoubt,vExam,vHist][tab]();if(tab==4&&ex&&!ex.done)startTimer()}
+function vEntry(){return`<div class="card hero"><h1>Study smarter with your own notes</h1><p>Upload your notes and question papers. Get topic-wise questions and answers, book references, a doubt box and a model exam.</p></div>
+<div class="card"><div class="row"><button class="${authMode==0?"on":"ghost"}" onclick="authMode=0;note='';view()">Sign in</button><button class="${authMode==1?"on":"ghost"}" onclick="authMode=1;note='';view()">Create account</button></div>${msg()}
+<label for="an">Name</label><input id="an" type="text" autocomplete="username"><label for="ap">PIN</label><input id="ap" type="password" autocomplete="current-password" onkeydown="if(event.key=='Enter')auth()">
+<div class="row" style="margin-top:.7rem"><button onclick="auth()">${authMode?"Create account":"Sign in"}</button></div>
+<p class="mut">Accounts and data stay on this device and browser only. This is not a secure online login.</p></div>`}
+function vUp(){return`<div class="card"><h2>Upload notes or papers</h2><p class="mut">Tap the file box and choose a PDF or TXT file from Documents. The subject and module are detected from your syllabus.</p>
+<label>File type</label><select id="ut"><option value="notes">Study notes</option><option value="paper">Previous-year question paper</option></select>
+<label>File</label><input type="file" accept="application/pdf,text/plain,.pdf,.txt" multiple onchange="upload(this)" ${busy?"disabled":""}>
+<details style="margin-top:.7rem" ${ex2?"open":""}><summary>Paste text instead</summary><label for="mn">Title</label><input id="mn" type="text"><label for="mt">Text</label><textarea id="mt"></textarea><div style="margin-top:.5rem"><button onclick="manual()">Save text</button></div></details></div>
+${ex2?`<div class="msg">Paste the text of ${esc(ex2.name)} above under "Paste text instead".</div>`:""}
+<div class="card"><h2>Your files</h2>${D.files.length?D.files.map(f=>`<div style="border-top:2px solid var(--lv);padding:.6rem 0"><b>${esc(f.name)}</b> <span class="tag p">${f.type=="paper"?"Question paper":"Notes"}</span><span class="tag">${f.pages.length} page(s)</span>
+<div class="grid"><div><label>Subject</label><select aria-label="Subject" onchange="setF(${f.id},'s',this.value)"><option value="">Not detected</option>${SUBJ.map((x,i)=>`<option value="${i}" ${f.s===i?"selected":""}>${x}</option>`).join("")}</select></div>
+<div><label>Module</label><select aria-label="Module" onchange="setF(${f.id},'mod',this.value)"><option value="">Not detected</option>${MODS.map((x,i)=>`<option value="${i}" ${f.mod===i?"selected":""}>${x}</option>`).join("")}</select></div></div>
+<div class="row" style="margin-top:.4rem"><button class="ghost" onclick="cf=${f.id};tab=1;view()">Open</button><button class="ghost" onclick="D.files=D.files.filter(y=>y.id!=${f.id});save();view()">Remove</button></div></div>`).join(""):`<p class="mut">No files yet. Upload your first file above.</p>`}</div>
+<div class="msg">${storeOk?"Your data is saved on this device and browser only.":"Storage is full or blocked. Data may be lost on refresh."}</div>`}
+function pickF(type){const l=D.files.filter(f=>f.type==type);return l}
+function vNotes(){const nf=D.files.filter(f=>f.type=="notes");if(!nf.length)return`<div class="card"><h2>Notes</h2><p class="mut">No notes yet. Upload notes first.</p><button onclick="tab=0;view()">Go to Upload</button></div>`;
+ const f=fOf(cf)&&fOf(cf).type=="notes"?fOf(cf):nf[0];cf=f.id;const all=topics(f),list=all.map((t,i)=>({t,i})).filter(x=>!ts||x.t.t.toLowerCase().includes(ts.toLowerCase()));
+ const papers=D.files.filter(p=>p.type=="paper"&&p.s===f.s).flatMap(parseQs);
+ return`<div class="card"><h2>Notes by topic</h2><label>File</label><select aria-label="File" onchange="cf=+this.value;ts='';view()">${nf.map(x=>`<option value="${x.id}" ${x.id==f.id?"selected":""}>${esc(x.name)}</option>`).join("")}</select>
+<p>${f.s!=null?`<span class="tag l">${SUBJ[f.s]}</span>`:`<span class="tag">Subject not detected</span>`}${f.mod!=null?`<span class="tag y">${MODS[f.mod]}</span>`:`<span class="tag">Module not detected</span>`}</p>
+<label for="sq">Find a topic</label><input id="sq" type="search" value="${esc(ts)}" oninput="ts=this.value;view();const e=$('#sq');e.focus();e.setSelectionRange(ts.length,ts.length)"><p class="mut">Shortcuts: press / to search, j or k to move between topics.</p>
+<div class="chips" style="margin:.5rem 0">${list.slice(0,40).map(x=>`<button onclick="document.getElementById('t${x.i}').scrollIntoView()">${esc(x.t.t.slice(0,28))}</button>`).join("")}</div>
+<div class="row"><button class="ghost" onclick='copy(${J(qaText(f))})'>Copy all</button><button class="ghost" onclick='dl(${J(f.name.replace(/\W+/g,"_")+"_notes.md")},${J(qaText(f))})'>Save as file</button></div></div>
+${!all.length?`<div class="card"><p class="mut">No topics were found. Notes need short topic headings on their own lines.</p></div>`:""}
+${list.map(({t,i})=>{const qa=D.qa[f.id+"|"+t.t];const rel=papers.filter(q=>{const tt=toks(t.t);return tt.length&&tt.filter(w=>toks(q.text).includes(w)).length/tt.length>=.5});
+ return`<div class="card topic" id="t${i}" tabindex="-1"><h3>${esc(t.t)}</h3>${t.p?`<span class="tag">Page ${t.p}</span>`:""}
+${rel.length?`<p><b>Previous-year questions on this topic</b></p>`+rel.map(q=>`<p>${esc(q.text)}${q.marks?` <span class="tag">${q.marks} marks</span>`:""}<br><span class="mut">${where(q)}</span></p>`).join(""):""}
+${qa&&qa.length?qa.map(x=>`<p><b>${esc(x.q)}</b> <span class="tag">${esc(x.marks)} marks</span><br><pre>${esc(x.a)}</pre></p>`).join("")+`<span class="tag p">AI-written from your notes. Check before use.</span>`:`<p><b>Your notes</b></p><pre>${esc(t.b.slice(0,900))}${t.b.length>900?"...":""}</pre>`}
+<div class="row" style="margin-top:.5rem"><button ${qaBusy?"disabled":""} onclick="genQA(${f.id},${i})">${qaBusy==f.id+"|"+i?"Working...":qa?"Redo Q&A":"Make Q&A"}</button><button class="ghost" onclick='copy(${J(t.t+"\n"+(qa?qa.map(x=>x.q+"\n"+x.a).join("\n\n"):t.b))})'>Copy</button></div></div>`}).join("")}`}
+function vBooks(){const fs=D.files.filter(f=>f.s!=null);if(!fs.length)return`<div class="card"><h2>Book references</h2><p class="mut">Upload a file first. Its subject and module are detected and matched to books.</p><button onclick="tab=0;view()">Go to Upload</button></div>`;
+ const f=fOf(bf)&&fOf(bf).s!=null?fOf(bf):fs[0];bf=f.id;const text=D.files.filter(x=>x.s===f.s&&x.mod===f.mod).map(x=>x.pages.map(p=>p.text).join(" ")).join(" ");
+ const mt=f.mod!=null&&SYLLABUS[f.s]?SYLLABUS[f.s][f.mod]:null,tk=new Set(toks(text));
+ const hit=mt?mt.slice(1).filter(tp=>{const tt=toks(tp);return tt.length&&tt.filter(w=>tk.has(w)).length/tt.length>=.6}).slice(0,6):[];const list=BOOKS.filter(b=>b.s==f.s);
+ return`<div class="card"><h2>Book references</h2><label>Detected from file</label><select aria-label="File" onchange="bf=+this.value;view()">${fs.map(x=>`<option value="${x.id}" ${x.id==f.id?"selected":""}>${esc(x.name)}</option>`).join("")}</select>
+<p><span class="tag l">${SUBJ[f.s]}</span>${mt?`<span class="tag y">${MODS[f.mod]}: ${esc(mt[0])}</span>`:`<span class="tag">Module not detected</span>`}</p>
+${mt?(hit.length?`<div class="msg">Syllabus topics found in your file: ${esc(hit.join(", "))}.</div>`:""):`<div class="msg">Module is not detected. Set it on the Upload page. The full list for this subject is shown.</div>`}
+<p class="mut">These books are listed in your syllabus for this subject. Chapter and page details are not provided. Check each book contents page for the topic.</p></div>
+${list.map(b=>`<div class="card"><h3>${esc(b.t)}</h3><p>${esc(b.a)}</p><p class="mut">${esc(b.d)}</p><span class="tag l">${SUBJ[b.s]}</span><span class="tag p">${esc(b.k)}</span></div>`).join("")}
+<button class="ghost" onclick='copy(${J(list.map((b,i)=>(i+1)+". "+b.a+", "+b.t+", "+b.d+".").join("\n"))})'>Copy bibliography</button>`}
+function vDoubt(){const fs=D.files.filter(f=>f.type=="notes");
+ return`<div class="card"><h2>Ask a doubt</h2><label>Use notes from</label><select id="df"><option value="0">No file</option>${fs.map(f=>`<option value="${f.id}" ${f.id==cf?"selected":""}>${esc(f.name)}</option>`).join("")}</select>
+<label for="dq">Your doubt</label><textarea id="dq" placeholder="Type your question here"></textarea><div style="margin-top:.5rem"><button ${doubt.busy?"disabled":""} onclick="askDoubt()">Ask</button></div>
+${doubt.a?`<div class="card" style="margin-top:.8rem;box-shadow:none;background:var(--pe)"><pre id="da">${esc(doubt.a)}</pre></div>`:""}
+<p class="mut">Answers come from an AI service. They may contain mistakes. Check them with your notes and books.</p></div>`}
+function vExam(){if(ex&&ex.done)return vRes();if(ex)return vRun();
+ return`<div class="card"><h2>Model exam</h2><label>Subject</label>${sub("es",es,"es=+this.value")}<label>Module</label><select id="em"><option value="all">All five modules</option>${MODS.map((n,i)=>`<option value="${i}">${n}</option>`).join("")}</select>
+<label>Exam source</label><select id="esrc"><option value="both">Question papers and notes</option><option value="papers">Question papers only</option><option value="notes">Notes only</option></select>
+<div class="msg" style="background:var(--pe)"><b>Section A:</b> Answer all 4 questions. Each question carries 5 marks.<br><b>Section B:</b> Answer all 4 questions. Each question carries 10 marks.<br>Maximum marks: 60. Time allowed: 90 minutes.</div><button onclick="build()">Start exam</button></div>`}
+function vRun(){const q=ex.qs[ex.cur],r=Math.max(0,ex.end-Date.now()),un=ex.qs.filter(x=>!(ex.ans[x.id]||"").trim()).length;
+ return`<div class="card"><div class="row" style="justify-content:space-between"><h2>Question ${ex.cur+1} of 8</h2><div>Time left <span id="tm">${Math.floor(r/60000)}:${String(Math.floor(r%60000/1000)).padStart(2,"0")}</span></div></div>
+<span class="tag l">Section ${q.sec}</span><span class="tag y">${q.marks} marks</span>${srcT(q)}${q.stated?"":`<span class="tag">Marks not stated in source</span>`}
+<p style="margin-top:.6rem">${esc(q.text)}</p><p class="mut">${where(q)}</p><label for="an2">Your answer</label><textarea id="an2" style="min-height:200px" oninput="ex.ans[${q.id}]=this.value">${esc(ex.ans[q.id]||"")}</textarea>
+<div class="row" style="margin-top:.6rem"><button class="ghost" ${ex.cur==0?"disabled":""} onclick="save();ex.cur--;view()">Previous</button><button class="ghost" ${ex.cur==7?"disabled":""} onclick="save();ex.cur++;view()">Next</button><button onclick="save();note='ok|Answer saved on this device.';view()">Save answer</button><button class="ghost" onclick="confirmD('Submit exam','You cannot change answers after submitting. Unanswered: ${un}.',submit)">Submit</button></div></div>
+<div class="card"><h3>Question palette</h3><div class="pal">${ex.qs.map((x,i)=>`<button class="${(ex.ans[x.id]||"").trim()?"a":""} ${i==ex.cur?"c":""}" aria-label="Question ${i+1}, ${(ex.ans[x.id]||"").trim()?"answered":"unanswered"}" onclick="save();ex.cur=${i};view()">${i+1}</button>`).join("")}</div><p class="mut">Lavender: answered. Yellow: current.</p></div>`}
+function vRes(){const a=D.att[D.att.length-1],tot=Object.values(ex.self||{}).reduce((x,y)=>x+(+y||0),0),ai=ex.ai?Object.values(ex.ai).reduce((x,y)=>x+y.m,0):null;
+ return`<div class="card"><h2>Exam submitted</h2><p>Answered ${a.answered} of 8. Verified score: not available, because all questions are descriptive.</p>
+<p><b>Self-assessed:</b> <span id="st">${tot}</span> of 60 <span class="tag">Not verified</span></p>${ai!=null?`<p><b>Estimated AI score:</b> ${ai} of 60 <span class="tag p">Estimate only</span></p>`:""}
+<div class="row"><button ${busy?"disabled":""} onclick="evalAI()">Estimate score with AI</button><button class="ghost" onclick="ex=null;save();view()">Generate another paper</button></div></div>
+${ex.qs.map(q=>`<div class="card"><h3>Q${q.id+1}. Section ${q.sec}, ${q.marks} marks</h3><p>${esc(q.text)}</p><p class="mut">${where(q)}</p><p><b>Your answer</b></p><pre>${esc(ex.ans[q.id]||"No answer given.")}</pre>
+${ex.ai&&ex.ai[q.id]?`<p><span class="tag p">Estimated: ${ex.ai[q.id].m} of ${q.marks}</span> ${esc(ex.ai[q.id].f)}</p>`:""}
+<label for="sf${q.id}">Marks you award yourself (0 to ${q.marks})</label><input id="sf${q.id}" type="number" min="0" max="${q.marks}" value="${ex.self[q.id]??""}" oninput="selfM(${q.id},this,${q.marks})" style="max-width:8rem"><p class="mut">Revise: ${esc(q.tp||q.text.slice(0,60))}</p></div>`).join("")}`}
+function selfM(i,el,max){const v=Math.max(0,Math.min(max,+el.value||0));ex.self[i]=v;const s=Object.values(ex.self).reduce((x,y)=>x+y,0);D.att[D.att.length-1].self=s;save();$("#st").textContent=s}
+function vHist(){return`<div class="card"><h2>Exam attempts</h2>${D.att.length?D.att.slice().reverse().map(a=>`<details style="border-top:2px solid var(--lv);padding:.5rem 0"><summary>${esc(a.at)}: ${esc(SUBJ[a.s])}, ${esc(a.scope)}. Answered ${a.answered} of 8. Self-assessed: ${a.self==null?"not entered":a.self+" of 60"}</summary>${a.qs.map((q,i)=>`<p><b>Q${i+1} (${q.m} marks)</b> ${esc(q.text)}</p><pre>${esc(q.a||"No answer given.")}</pre>`).join("")}</details>`).join(""):`<p class="mut">No attempts yet. Take a model exam to see results here.</p>`}</div>
+<div class="card"><h2>Saved doubts</h2>${D.doubts.length?D.doubts.map((d,i)=>`<details style="border-top:2px solid var(--lv);padding:.5rem 0"><summary>${esc(d.q.slice(0,80))}</summary><pre>${esc(d.a)}</pre><p class="mut">${esc(d.at)}${d.f?", "+esc(d.f):""}</p><button class="ghost" onclick='copy(${J(d.q+"\n"+d.a)})'>Copy</button> <button class="ghost" onclick="D.doubts.splice(${i},1);save();view()">Remove</button></details>`).join(""):`<p class="mut">No doubts yet. Ask one in Ask doubt.</p>`}</div>
+<button class="ghost" onclick="confirmD('Clear all data','This removes your files, doubts and attempts from this device.',()=>{D=blank();ex=null;save();view()})">Clear my data</button>`}
+document.addEventListener("keydown",e=>{if(!user||tab!=1)return;const t=e.target.tagName;if(e.key=="/"&&t!="INPUT"&&t!="TEXTAREA"){e.preventDefault();const s=$("#sq");if(s)s.focus()}
+ else if((e.key=="j"||e.key=="k")&&t!="INPUT"&&t!="TEXTAREA"){const c=[...document.querySelectorAll(".topic")];if(!c.length)return;let i=c.findIndex(x=>x.getBoundingClientRect().top>=-5);i=e.key=="j"?Math.min(c.length-1,(i<0?c.length-1:i)+(c[i]&&Math.abs(c[i].getBoundingClientRect().top)<5?1:0)):Math.max(0,(i<0?0:i)-1);c[i].scrollIntoView()}});
+view();
+</script></body></html>
